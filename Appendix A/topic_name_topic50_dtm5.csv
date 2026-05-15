@@ -1,0 +1,253 @@
+"topic","topic_name","price_taste","Probability"
+1,"P2 European","P2_German",0.0672041368920377
+1,"P2 European","P2_Belgian",0.0480669394735235
+1,"P2 European","P2_American..New., P2_American..Traditional.",0.0474561778537837
+1,"P2 European","P2_American..Traditional., P2_Tapas.Small.Plates",0.0446059569616645
+1,"P2 European","P2_German",0.0405342128300658
+2,"P2 Asian","P2_Asian.Fusion, P2_Chinese, P2_Dim.Sum, P2_Shanghainese",0.152815013404826
+2,"P2 Asian","P2_Ethnic.Food, P2_Japanese, P2_Ramen, P2_Specialty.Food",0.109160359676386
+2,"P2 Asian","P2_Chinese, P2_Ethnic.Food, P2_Fast.Food, P2_Fruits...Veggies, P2_Seafood, P2_Specialty.Food",0.100144724667252
+2,"P2 Asian","P2_Chinese, P2_Comfort.Food, P2_Ethnic.Food, P2_Noodles, P2_Specialty.Food",0.0733350731927211
+2,"P2 Asian","P4_Ethnic.Food, P4_Israeli, P4_Middle.Eastern, P4_Specialty.Food",0.0327647156516169
+3,"P2 Italian & American","P2_Italian, P2_Pizza",0.0345812230421257
+3,"P2 Italian & American","P2_Italian, P2_Pizza, P2_Salad, P2_Sandwiches",0.0336794962352906
+3,"P2 Italian & American","P2_Burgers, P2_Hot.Dogs",0.0336794962352906
+3,"P2 Italian & American","P2_American..New., P2_Comfort.Food",0.02826913539428
+3,"P2 Italian & American","P2_Mexican",0.0254136671726356
+4,"P2 LA & American","P2_American..New., P2_Caribbean, P2_Cuban, P2_Latin.American",0.0319287130518015
+4,"P2 LA & American","P2_American..New.",0.0264591262335058
+4,"P2 LA & American","P2_Cheesesteaks, P2_Sandwiches",0.0232685339228332
+4,"P2 LA & American","P2_Seafood, P2_Soul.Food, P2_Southern",0.0207616399644477
+4,"P2 LA & American","P2_Cheesesteaks, P2_Sandwiches",0.020305841062923
+5,"P2 Cheesesteaks(American)","P2_Cheesesteaks, P2_Sandwiches",0.0474825941928407
+5,"P2 Cheesesteaks(American)","P2_American..New., P2_Pizza",0.0351698045624482
+5,"P2 Cheesesteaks(American)","P2_American..New., P2_American..Traditional.",0.0239763594439096
+5,"P2 Cheesesteaks(American)","P2_Italian, P2_Pizza",0.0221854082249435
+5,"P2 Cheesesteaks(American)","P2_American..Traditional.",0.0219615393225727
+6,"P2-3 Expensive Mixed Cuisine","P3_Japanese, P3_Sushi.Bars",0.0401009482454675
+6,"P2-3 Expensive Mixed Cuisine","P2_American..Traditional.",0.0360184824361187
+6,"P2-3 Expensive Mixed Cuisine","P3_American..New.",0.0337916829037466
+6,"P2-3 Expensive Mixed Cuisine","P2_American..New., P2_Pizza, P2_Sandwiches",0.0324927165098629
+6,"P2-3 Expensive Mixed Cuisine","P3_Modern.European",0.0304514836051884
+7,"P2-4 Expensive Mixed Cuisine","P4_Ethnic.Food, P4_Israeli, P4_Middle.Eastern, P4_Specialty.Food",0.0581139130628325
+7,"P2-4 Expensive Mixed Cuisine","P2_American..New., P2_Asian.Fusion, P2_Chinese, P2_Pan.Asian, P2_Tapas.Small.Plates, P2_Thai",0.0514367112555365
+7,"P2-4 Expensive Mixed Cuisine","P2_American..New., P2_Sandwiches",0.0509915644683835
+7,"P2-4 Expensive Mixed Cuisine","P2_Italian",0.0496561241069243
+7,"P2-4 Expensive Mixed Cuisine","P2_Italian",0.0423112021188987
+8,"P2 Western","P2_Mexican",0.0429240328294967
+8,"P2 Western","P1_Sandwiches",0.0358026669515213
+8,"P2 Western","P2_Greek",0.0325980523064324
+8,"P2 Western","P2_Belgian",0.0269009596040521
+8,"P2 Western","P2_American..New., P2_Seafood",0.0236963449589631
+9,"P2 American","P2_American..Traditional.",0.0368450286983892
+9,"P2 American","P2_American..New., P2_French, P2_Italian, P2_Mexican",0.0335534571787118
+9,"P2 American","P2_Chinese, P2_Noodles, P2_Szechuan",0.0259416980394577
+9,"P2 American","P2_American..New., P2_American..Traditional.",0.0249130819395585
+9,"P2 American","P2_Asian.Fusion, P2_Japanese, P2_Sushi.Bars",0.0236787426196795
+10,"P3-4 Expensive Western","P3_Seafood",0.0665234580314907
+10,"P3-4 Expensive Western","P4_American..Traditional.",0.0596677254964693
+10,"P3-4 Expensive Western","P4_American..Traditional., P4_Seafood, P4_Specialty.Food",0.0491556022761032
+10,"P3-4 Expensive Western","P3_Italian",0.0384149546379031
+10,"P3-4 Expensive Western","P3_American..New., P3_French",0.0377293813844009
+11,"P2 American & LA","P2_Mexican, P2_Tacos",0.0544390024207623
+11,"P2 American & LA","P2_American..New.",0.0420537071440635
+11,"P2 American & LA","P2_Pizza, P2_Specialty.Food",0.0371746514290004
+11,"P2 American & LA","P2_American..New., P2_American..Traditional., P2_Barbeque, P2_Sandwiches, P2_Southern",0.0287301319221603
+11,"P2 American & LA","P2_American..New., P2_Comfort.Food",0.0277918519769558
+12,"P2 European","P2_British",0.0745483093389947
+12,"P2 European","P2_Spanish",0.0657024702005794
+12,"P2 European","P4_Ethnic.Food, P4_Israeli, P4_Middle.Eastern, P4_Specialty.Food",0.060837258674451
+12,"P2 European","P2_American..New., P2_Burgers",0.0597315287821491
+12,"P2 European","P3_American..New., P3_French",0.0455781861606847
+13,"P2 American","P2_American..New., P2_American..Traditional.",0.0377144740365404
+13,"P2 American","P2_American..New., P2_Burgers",0.0288574429957363
+13,"P2 American","P2_American..Traditional., P2_Southern",0.0267976683350841
+13,"P2 American","P2_Fast.Food, P2_Mexican",0.0212362767513234
+13,"P2 American","P2_Creperies, P2_French",0.0212362767513234
+14,"P2 American","P2_American..Traditional.",0.0347099749995155
+14,"P2 American","P2_American..New., P2_American..Traditional.",0.029864919862788
+14,"P2 American","P2_American..New., P2_American..Traditional.",0.0267640845752825
+14,"P2 American","P2_Comfort.Food, P2_Specialty.Food",0.0244384581096533
+14,"P2 American","P2_American..New.",0.0236632492877769
+15,"P1-4 Mixed Cuisine","P2_Japanese, P2_Sushi.Bars",0.0582191002296029
+15,"P1-4 Mixed Cuisine","P2_American..Traditional., P2_Burgers, P2_Salad",0.0384414285389529
+15,"P1-4 Mixed Cuisine","P2_American..Traditional., P2_Burgers, P2_Salad, P2_Sandwiches",0.0348041555843506
+15,"P1-4 Mixed Cuisine","P1_Italian, P1_Pizza",0.0291209165927846
+15,"P1-4 Mixed Cuisine","P4_Brazilian, P4_Seafood",0.0261656323171702
+15,"P1-4 Mixed Cuisine","P2_American..New.",0.0261656323171702
+16,"P2-3 LA","P2_Mexican",0.0600058192887039
+16,"P2-3 LA","P2_Cuban, P2_Latin.American",0.0553056245663511
+16,"P2-3 LA","P2_American..New., P2_American..Traditional., P2_Specialty.Food",0.0548579869737461
+16,"P2-3 LA","P3_American..New., P3_American..Traditional., P3_Seafood",0.0434432283623179
+16,"P2-3 LA","P3_Mexican",0.0344904765102173
+17,"P1-2 Japanese & Middle Eastern","P2_Japanese, P2_Sushi.Bars",0.0425395777002621
+17,"P1-2 Japanese & Middle Eastern","P1_Comfort.Food, P1_Kosher, P1_Middle.Eastern",0.0408883568288303
+17,"P1-2 Japanese & Middle Eastern","P2_Mexican, P2_Tex.Mex",0.0386179281306116
+17,"P1-2 Japanese & Middle Eastern","P2_Japanese, P2_Ramen",0.0270593820305889
+17,"P1-2 Japanese & Middle Eastern","P2_Noodles, P2_Salad, P2_Thai",0.0266465768127309
+18,"P2 Asian","P2_Asian.Fusion, P2_Japanese, P2_Korean",0.0632232412460849
+18,"P2 Asian","P2_Seafood, P2_Vietnamese",0.0459686040623417
+18,"P2 Asian","P2_Korean",0.0409047431497215
+18,"P2 Asian","P2_Japanese, P2_Korean",0.0358408822371012
+18,"P2 Asian","P2_Barbeque, P2_Cantonese, P2_Chinese, P2_Dim.Sum, P2_Hong.Kong.Style.Cafe, P2_Noodles",0.0332151765787055
+19,"P2-3 Mixed Cuisine","P3_American..New., P3_Lebanese, P3_Middle.Eastern, P3_Specialty.Food",0.0488701686547325
+19,"P2-3 Mixed Cuisine","P2_American..New., P2_American..Traditional.",0.0303992818795422
+19,"P2-3 Mixed Cuisine","P2_American..Traditional.",0.0302266567694937
+19,"P2-3 Mixed Cuisine","P2_American..New., P2_Burgers",0.025911029018281
+19,"P2-3 Mixed Cuisine","P3_Thai",0.0240121528077474
+20,"P1-2 Fast Food","P2_Sandwiches",0.0556746573117651
+20,"P1-2 Fast Food","P1_Italian, P1_Sandwiches",0.0320708547175123
+20,"P1-2 Fast Food","P2_Italian, P2_Sandwiches, P2_Specialty.Food",0.0309881114792438
+20,"P1-2 Fast Food","P2_American..New., P2_American..Traditional.",0.0281729790597458
+20,"P1-2 Fast Food","P2_Specialty.Food",0.0249247493449403
+21,"P1-2 Fast Food","P2_Chinese, P2_Ethnic.Food, P2_Fast.Food, P2_Fruits...Veggies, P2_Seafood, P2_Specialty.Food",0.135717145325439
+21,"P1-2 Fast Food","P1_Fast.Food, P1_Specialty.Food",0.0912577171874671
+21,"P1-2 Fast Food","P1_Sandwiches",0.0636549442676837
+21,"P1-2 Fast Food","P2_Salad, P2_Sandwiches",0.0535409511367707
+21,"P1-2 Fast Food","P2_American..Traditional., P2_Sandwiches",0.0467982890494954
+22,"P2 American & Mexican","P2_American..New., P2_Burgers",0.0619680508832883
+22,"P2 American & Mexican","P2_American..Traditional., P2_Southern",0.054798801448556
+22,"P2 American & Mexican","P2_Barbeque, P2_Mexican, P2_Tex.Mex",0.0529605323627273
+22,"P2 American & Mexican","P2_Mexican",0.0498354749168183
+22,"P2 American & Mexican","P2_American..New.",0.0399088218533429
+23,"P2 American & Mexican","P2_Barbeque, P2_Mexican",0.0249201791200627
+23,"P2 American & Mexican","P2_Mexican",0.0207032269724292
+23,"P2 American & Mexican","P2_Pizza, P2_Sandwiches",0.0190967690114259
+23,"P2 American & Mexican","P2_Cheesesteaks, P2_Sandwiches, P2_Specialty.Food",0.0182935400309243
+23,"P2 American & Mexican","P2_Vietnamese",0.0180927327857989
+24,"P3 Expensive Western","P3_American..New.",0.0416995043696037
+24,"P3 Expensive Western","P3_French",0.0397730257972994
+24,"P3 Expensive Western","P3_French, P3_Specialty.Food",0.0338184556647227
+24,"P3 Expensive Western","P3_American..New.",0.0317168426767544
+24,"P3 Expensive Western","P3_American..New., P3_Seafood",0.0269882134538258
+25,"P2 Italian Casual","P2_Italian, P2_Pizza",0.0311989331129435
+25,"P2 Italian Casual","P2_Fast.Food, P2_Mexican",0.0283814496891377
+25,"P2 Italian Casual","P2_American..New., P2_Burgers, P2_Italian, P2_Pizza, P2_Specialty.Food",0.0233099795262871
+25,"P2 Italian Casual","P2_Italian, P2_Pizza",0.0203046638742275
+25,"P2 Italian Casual","P2_American..New.",0.0203046638742275
+26,"P2 Mixed Asian","P2_Chinese, P2_Comfort.Food, P2_Ethnic.Food, P2_Noodles, P2_Specialty.Food",0.0807470748868823
+26,"P2 Mixed Asian","P2_Asian.Fusion, P2_Cambodian, P2_Chinese, P2_Malaysian, P2_Thai",0.0494528493691323
+26,"P2 Mixed Asian","P2_Thai, P2_Vietnamese",0.0418784508361737
+26,"P2 Mixed Asian","P2_Chinese, P2_Noodles, P2_Szechuan",0.0402838406187088
+26,"P2 Mixed Asian","P2_Barbeque, P2_Cantonese, P2_Chinese, P2_Dim.Sum, P2_Hong.Kong.Style.Cafe, P2_Noodles",0.0364966413522295
+27,"P2-3 Mixed Cuisine","P2_American..New., P2_Burgers",0.0358345658333185
+27,"P2-3 Mixed Cuisine","P2_American..New., P2_Italian, P2_Modern.European, P2_Pizza, P2_Sandwiches, P2_Specialty.Food",0.0352999875265062
+27,"P2-3 Mixed Cuisine","P3_Asian.Fusion, P3_Chinese, P3_Latin.American, P3_Peruvian",0.0336962526060692
+27,"P2-3 Mixed Cuisine","P2_Greek",0.0331616742992569
+27,"P2-3 Mixed Cuisine","P3_American..New., P3_American..Traditional., P3_French",0.0290632406136959
+28,"P2 American Fast Food","P2_Chinese, P2_Ethnic.Food, P2_Fast.Food, P2_Fruits...Veggies, P2_Seafood, P2_Specialty.Food",0.104706376024205
+28,"P2 American Fast Food","P2_American..Traditional., P2_Cheesesteaks, P2_Fast.Food, P2_Italian, P2_Sandwiches",0.0854921707634886
+28,"P2 American Fast Food","P2_American..New., P2_American..Traditional., P2_Cheesesteaks, P2_Salad, P2_Sandwiches",0.08394620022527
+28,"P2 American Fast Food","P2_American..Traditional., P2_Cheesesteaks, P2_Italian, P2_Pizza, P2_Sandwiches",0.0808542591488328
+28,"P2 American Fast Food","P2_American..Traditional., P2_Sandwiches",0.0687073477771152
+29,"P1-2 Mixed Asian","P2_Barbeque, P2_Chinese, P2_Hot.Pot, P2_Korean",0.0438346967260906
+29,"P1-2 Mixed Asian","P2_Ethnic.Food, P2_Japanese, P2_Ramen, P2_Specialty.Food",0.0422445626247814
+29,"P1-2 Mixed Asian","P2_Japanese, P2_Sushi.Bars, P2_Taiwanese",0.0350006183854838
+29,"P1-2 Mixed Asian","P1_Creperies, P1_Japanese, P1_Salad",0.0291701266806834
+29,"P1-2 Mixed Asian","P2_Asian.Fusion, P2_Korean",0.0281100372798106
+30,"P2 American","P2_American..Traditional., P2_Comfort.Food",0.0414357658130627
+30,"P2 American","P2_American..Traditional.",0.0412413229889751
+30,"P2 American","P2_American..New., P2_Burgers",0.0379357949794863
+30,"P2 American","P2_American..New., P2_Salad, P2_Seafood, P2_Southern",0.032102510256859
+30,"P2 American","P2_Italian, P2_Pizza, P2_Salad",0.0241303544692683
+31,"P2 Mixed Cuisine","P2_Chinese, P2_Noodles, P2_Szechuan",0.0631145087384006
+31,"P2 Mixed Cuisine","P2_Belgian",0.0589698127979
+31,"P2 Mixed Cuisine","P2_American..New., P2_American..Traditional.",0.0536738124294826
+31,"P2 Mixed Cuisine","P2_American..Traditional., P2_Southern",0.051371203573649
+31,"P2 Mixed Cuisine","P2_Creperies, P2_French",0.0467659858619816
+32,"P1-3 Western","P2_American..New., P2_Fruits...Veggies, P2_Italian, P2_Sandwiches, P2_Specialty.Food",0.0534949615458361
+32,"P1-3 Western","P2_Specialty.Food",0.0368776497155883
+32,"P1-3 Western","P3_American..New., P3_French, P3_Greek, P3_Italian, P3_Modern.European, P3_Spanish",0.0332559279064318
+32,"P1-3 Western","P2_American..New.",0.0272907390442915
+32,"P1-3 Western","P1_Sandwiches",0.0243081446132214
+33,"P2 American Sandwiches","P2_American..New., P2_Sandwiches",0.0470902418874522
+33,"P2 American Sandwiches","P2_American..Traditional.",0.0390209225921728
+33,"P2 American Sandwiches","P2_American..New., P2_American..Traditional., P2_Sandwiches",0.0382524159926223
+33,"P2 American Sandwiches","P2_Barbeque",0.0269169436492536
+33,"P2 American Sandwiches","P2_American..Traditional., P2_Barbeque, P2_Cajun.Creole",0.026724816999366
+34,"P1-2 Mixed Fast Food","P2_Burgers",0.0506418334436874
+34,"P1-2 Mixed Fast Food","P1_Pizza",0.0467972404365749
+34,"P1-2 Mixed Fast Food","P1_Cheesesteaks, P1_Sandwiches",0.0341955189132617
+34,"P1-2 Mixed Fast Food","P2_Chinese, P2_Kosher",0.03163245690852
+34,"P1-2 Mixed Fast Food","P2_Indian",0.0290693949037784
+35,"P2-3 American Fast Food","P2_American..New., P2_Sandwiches",0.057057758570344
+35,"P2-3 American Fast Food","P2_American..New.",0.0358387354240885
+35,"P2-3 American Fast Food","P3_American..New., P3_Lebanese, P3_Middle.Eastern, P3_Specialty.Food",0.0329186863672643
+35,"P2-3 American Fast Food","P2_Fast.Food",0.0266892483793728
+35,"P2-3 American Fast Food","P3_Chinese, P3_Italian, P3_Pizza, P3_Szechuan, P3_Tapas.Small.Plates",0.0255212287566431
+36,"P2 Western","P2_Sandwiches, P2_Seafood",0.0493313581850281
+36,"P2 Western","P2_Italian, P2_Pizza, P2_Salad",0.0389821222021551
+36,"P2 Western","P2_Italian, P2_Pizza",0.0282270338277968
+36,"P2 Western","P2_Barbeque",0.026603624261856
+36,"P2 Western","P2_American..New., P2_French",0.0264006980661134
+37,"P2-4 Mixed Cuisine","P4_American..New., P4_American..Traditional., P4_Asian.Fusion, P4_Japanese, P4_Sushi.Bars",0.0747609986473784
+37,"P2-4 Mixed Cuisine","P3_Caribbean, P3_Cuban, P3_Latin.American",0.0678832618812903
+37,"P2-4 Mixed Cuisine","P3_Asian.Fusion, P3_Chinese",0.0678832618812903
+37,"P2-4 Mixed Cuisine","P2_Asian.Fusion, P2_Sushi.Bars",0.0555033357023316
+37,"P2-4 Mixed Cuisine","P2_Spanish",0.0461037621220111
+38,"P1-2 American & Asian","P2_Cheesesteaks, P2_Sandwiches",0.0502387338545531
+38,"P1-2 American & Asian","P2_Chinese, P2_Noodles, P2_Szechuan, P2_Taiwanese",0.0399665201925089
+38,"P1-2 American & Asian","P1_Sandwiches, P1_Soul.Food",0.0249386520572961
+38,"P1-2 American & Asian","P2_Pizza",0.0243679735205159
+38,"P1-2 American & Asian","P2_Middle.Eastern",0.0237972949837357
+39,"P2 American","P2_American..New.",0.0775832396337685
+39,"P2 American","P2_American..New.",0.0670276968264531
+39,"P2 American","P2_Mexican",0.0592257738819156
+39,"P2 American","P2_American..New., P2_American..Traditional.",0.0514238509373781
+39,"P2 American","P2_American..New., P2_Asian.Fusion, P2_Chinese, P2_Pan.Asian, P2_Tapas.Small.Plates, P2_Thai",0.0477523577870075
+40,"P1-2 Middle Eastern & American","P2_Halal, P2_Lebanese, P2_Middle.Eastern",0.0438346967260906
+40,"P1-2 Middle Eastern & American","P1_Cheesesteaks, P1_Halal, P1_Indian, P1_Middle.Eastern",0.0388876128553508
+40,"P1-2 Middle Eastern & American","P2_American..New.",0.0364140709199809
+40,"P1-2 Middle Eastern & American","P2_Vietnamese",0.0355306630859202
+40,"P1-2 Middle Eastern & American","P2_American..New., P2_Pizza",0.033940528984611
+41,"P1-2 LA & American","P2_Argentine, P2_Caribbean, P2_Cuban, P2_Italian, P2_Latin.American",0.03845120766958
+41,"P1-2 LA & American","P2_Sandwiches",0.0312196532986219
+41,"P1-2 LA & American","P1_American..New., P1_Cheesesteaks, P1_Fast.Food, P1_Sandwiches",0.0272939523543875
+41,"P1-2 LA & American","P2_Burgers",0.0262608731585363
+41,"P1-2 LA & American","P2_American..New., P2_Barbeque",0.0235748672493233
+42,"P2-4 Western & Middle Eastern","P4_Ethnic.Food, P4_Israeli, P4_Middle.Eastern, P4_Specialty.Food",0.0810097053192192
+42,"P2-4 Western & Middle Eastern","P2_Italian, P2_Pizza",0.0763881247386606
+42,"P2-4 Western & Middle Eastern","P2_Spanish",0.0574616518849447
+42,"P2-4 Western & Middle Eastern","P3_American..New., P3_French",0.0565813508219811
+42,"P2-4 Western & Middle Eastern","P3_American..New.",0.0546006734303132
+43,"P2 American & Middle Eastern","P2_American..Traditional., P2_Burgers, P2_Kosher, P2_Seafood, P2_Tapas.Small.Plates",0.0616263124501116
+43,"P2 American & Middle Eastern","P2_Indian",0.0563048772999857
+43,"P2 American & Middle Eastern","P2_American..New.",0.051188112732557
+43,"P2 American & Middle Eastern","P2_Latin.American",0.0491414069055855
+43,"P2 American & Middle Eastern","P2_Mexican",0.0362471601956651
+44,"P1-2 Asian & Mexican","P1_Asian.Fusion, P1_Ethnic.Food, P1_Indonesian, P1_Singaporean, P1_Specialty.Food",0.0412831418354176
+44,"P1-2 Asian & Mexican","P1_Mexican",0.0336655451871601
+44,"P1-2 Asian & Mexican","P2_Mexican",0.0313379462113037
+44,"P1-2 Asian & Mexican","P2_Mexican",0.0311263463044076
+44,"P1-2 Asian & Mexican","P2_Cambodian",0.0290103472354472
+45,"P2 American & Irish","P2_American..New.",0.0523638983661446
+45,"P2 American & Irish","P2_American..Traditional., P2_Irish",0.0449469155947361
+45,"P2 American & Irish","P2_American..Traditional., P2_Burgers, P2_Sandwiches",0.0360465362690457
+45,"P2 American & Irish","P2_Irish",0.0320201741931382
+45,"P2 American & Irish","P2_American..Traditional., P2_Burgers",0.0301129500519189
+46,"P2 Western","P2_Italian, P2_Pizza",0.0492761039681017
+46,"P2 Western","P2_American..New., P2_Greek, P2_Latin.American, P2_Pizza, P2_Tapas.Small.Plates",0.0447983965542975
+46,"P2 Western","P2_American..New., P2_Modern.European, P2_Specialty.Food",0.0392545683276829
+46,"P2 Western","P2_American..New., P2_Asian.Fusion, P2_Chinese, P2_Pan.Asian, P2_Tapas.Small.Plates, P2_Thai",0.0388281200025587
+46,"P2 Western","P2_Japanese, P2_Sushi.Bars",0.0349900850764409
+47,"P2-3 Western","P2_American..New., P2_Greek, P2_Seafood",0.048596591269087
+47,"P2-3 Western","P2_Japanese, P2_Sushi.Bars",0.031278379691229
+47,"P2-3 Western","P3_Italian",0.02895520496737
+47,"P2-3 Western","P2_American..New., P2_Asian.Fusion, P2_Middle.Eastern",0.027265623350018
+47,"P2-3 Western","P2_Sandwiches",0.0213520876892859
+47,"P2-3 Western","P3_Italian",0.0213520876892859
+48,"P2 American & Chinese","P2_Chinese, P2_Szechuan",0.0495602586909176
+48,"P2 American & Chinese","P2_American..New.",0.0304410713395069
+48,"P2 American & Chinese","P2_American..New., P2_American..Traditional., P2_Comfort.Food",0.0301085637333954
+48,"P2 American & Chinese","P2_Ethnic.Food, P2_Indian, P2_Specialty.Food",0.0267834876722805
+48,"P2 American & Chinese","P2_American..New., P2_American..Traditional.",0.0256197110508903
+49,"P1-2 American","P2_Barbeque, P2_Buffets",0.0384466931816275
+49,"P1-2 American","P2_Mexican",0.0324053097048113
+49,"P1-2 American","P2_American..New., P2_Burgers, P2_Sandwiches",0.0235110506972763
+49,"P1-2 American","P2_American..Traditional., P2_Cheesesteaks, P2_Sandwiches",0.0214972562050043
+49,"P1-2 American","P1_Burgers",0.0188121968819749
+50,"P2 Mixed Cuisine","P2_Chinese, P2_Ethnic.Food, P2_Fast.Food, P2_Fruits...Veggies, P2_Seafood, P2_Specialty.Food",0.0789912806411431
+50,"P2 Mixed Cuisine","P2_British",0.0757009565442196
+50,"P2 Mixed Cuisine","P2_Italian, P2_Pizza",0.0742908176455381
+50,"P2 Mixed Cuisine","P2_American..New.",0.0710004935486146
+50,"P2 Mixed Cuisine","P2_Mexican",0.0531387341653153
