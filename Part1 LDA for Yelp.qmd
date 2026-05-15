@@ -1,0 +1,907 @@
+---
+title: "LDA (DTM >5) "
+subtitle: " "
+author: Min Tang
+date: last-modified
+format: pdf
+execute: 
+  
+  message: false
+  warning: false
+  echo: false
+editor: 
+  markdown: 
+    wrap: sentence
+---
+
+#Loading
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+# Load libraries
+library(flextable)
+library(officer)
+library(modelsummary)
+library(dplyr)
+library(knitr)
+library(kableExtra)
+library(tibble)
+library(tidyverse)
+library(quanteda)
+library(topicmodels)
+library(jsonlite)
+library(stringr)
+library(ggplot2)
+library(purrr) #for?
+library(tidyr)
+library(data.table)
+library(glue)
+library(tidygraph)
+library(ggraph)
+library(slam)         # New: needed for perplexity calc
+library(topicdoc) 
+library(Matrix)
+library(tm)
+library(mlbench)
+library(elasticnet) 
+library(mclust) 
+library(cluster)
+
+```
+
+```{r}
+# file path
+# =================
+data_dir <- '/Users/a1-6/Desktop/CSS/1.Thesis/Data/'
+#setwd(data_dir)
+business <- paste0(data_dir,'merged_ph_dataclean0319.csv') #list()
+user <- paste0(data_dir,'user_stat0319.csv')
+review <- paste0(data_dir,'all_philly_reviews.csv')
+
+```
+
+## 1.PH Stats
+This is a list of users' visiting history, including business attributes, and users' attributes, review text and friends.Please note that user or business can be duplicated.
+
+```{r}
+#all records of users and their business visited(user id or business id can be duplicated)
+business_dt<-read.csv(business)
+dim(business_dt) #280112
+
+```
+
+###1.1 Business-Level Data(unique business?)
+
+```{r}
+# PH Business-Level Data (Unique ID)
+# ==================================
+
+uni_business <- business_dt |> distinct(business_id, .keep_all = TRUE) |> select(-user_id)
+head(uni_business)
+nrow(uni_business) #4387
+
+
+
+num_vars_business <- uni_business |> 
+  select(stars_restaurant, review.count_restaurant, price_level,cat_count_restaurant)
+#sum(is.na(num_vars_business))
+
+desc_table1 <- data.frame(
+  Statistic = c("N", "Mean", "SD", "Median", "Min", "Max"),
+  restaurant_category_count = c(
+    nrow(num_vars_business),
+    #sum(unique(num_vars_business$bs_cat_count)),
+    mean(num_vars_business$cat_count_restaurant, na.rm = TRUE),
+    sd(num_vars_business$cat_count_restaurant, na.rm = TRUE),
+    median(num_vars_business$cat_count_restaurant, na.rm = TRUE),
+    min(num_vars_business$cat_count_restaurant, na.rm = TRUE),
+    max(num_vars_business$cat_count_restaurant, na.rm = TRUE)
+  ),
+   restaurant_star = c(
+    nrow(num_vars_business),
+    mean(num_vars_business$stars_restaurant, na.rm = TRUE),
+    sd(num_vars_business$stars_restaurant, na.rm = TRUE),
+    median(num_vars_business$stars_restaurant, na.rm = TRUE),
+    min(num_vars_business$stars_restaurant, na.rm = TRUE),
+    max(num_vars_business$stars_restaurant, na.rm = TRUE)
+  ),
+  restaurant_review_count = c(
+    #length(num_vars_business$review_count),
+    nrow(num_vars_business),
+    mean(num_vars_business$review.count_restaurant, na.rm = TRUE),
+    sd(num_vars_business$review.count_restaurant, na.rm = TRUE),
+    median(num_vars_business$review.count_restaurant, na.rm = TRUE),
+    min(num_vars_business$review.count_restaurant, na.rm = TRUE),
+    max(num_vars_business$review.count_restaurant, na.rm = TRUE)
+  ),
+  
+  price_level = c(
+    nrow(num_vars_business),
+    mean(num_vars_business$price_level, na.rm = TRUE),
+    sd(num_vars_business$price_level, na.rm = TRUE),
+    median(num_vars_business$price_level, na.rm = TRUE),
+    min(num_vars_business$price_level, na.rm = TRUE),
+    max(num_vars_business$price_level, na.rm = TRUE)
+  )
+) 
+#desc_table1
+```
+
+### 1.2 User-Level Data
+
+```{r}
+# PH User-Level Data (Unique ID)
+# ==================================
+user_dt<- read.csv(user)
+
+dim(user_dt)#25034
+#colnames(user_dt)
+head(user_dt,2)
+
+
+num_vars_user <-user_dt |> select(review_count_median,restaurant_star_median,restaurant_cat_median,price_level_median,user_star_median,user_cat_count,user_visit_count,friend_count)
+
+desc_table2 <- data.frame(
+  Statistic = c("N", "Mean", "SD", "Median", "Min", "Max"),
+  user_review_count = c(
+    nrow(num_vars_user),
+    mean(num_vars_user$review_count_median, na.rm = TRUE),
+    sd(num_vars_user$review_count_median, na.rm = TRUE),
+    median(num_vars_user$review_count_median, na.rm = TRUE),
+    min(num_vars_user$review_count_median, na.rm = TRUE),
+    max(num_vars_user$review_count_median, na.rm = TRUE)
+  ),
+  restaurant_visit_star = c( #restaurant's rating star that users visited 
+    nrow(num_vars_user),
+    mean(num_vars_user$restaurant_star_median, na.rm = TRUE),
+    sd(num_vars_user$restaurant_star_median, na.rm = TRUE),
+    median(num_vars_user$restaurant_star_median, na.rm = TRUE),
+    min(num_vars_user$restaurant_star_median, na.rm = TRUE),
+    max(num_vars_user$restaurant_star_median, na.rm = TRUE)
+  ),
+  price_level = c(
+    nrow(num_vars_user),
+    mean(num_vars_user$price_level_median, na.rm = TRUE),
+    sd(num_vars_user$price_level_median, na.rm = TRUE),
+    median(num_vars_user$price_level_median, na.rm = TRUE),
+    min(num_vars_user$price_level_median, na.rm = TRUE),
+    max(num_vars_user$price_level_median, na.rm = TRUE)
+  ),
+ user_category_count = c(  #restaurant category number that users visited 
+    nrow(num_vars_user),
+    #sum(num_vars_user$user_cat_count),
+    mean(num_vars_user$user_cat_count, na.rm = TRUE),
+    sd(num_vars_user$user_cat_count, na.rm = TRUE),
+    median(num_vars_user$user_cat_count, na.rm = TRUE),
+    min(num_vars_user$user_cat_count, na.rm = TRUE),
+    max(num_vars_user$user_cat_count, na.rm = TRUE)
+  ),
+ restaurant_visit_count = c(  #restaurant number that users visited 
+    nrow(num_vars_user),
+    mean(num_vars_user$user_visit_count, na.rm = TRUE),
+    sd(num_vars_user$user_visit_count, na.rm = TRUE),
+    median(num_vars_user$user_visit_count, na.rm = TRUE),
+    min(num_vars_user$user_visit_count, na.rm = TRUE),
+    max(num_vars_user$user_visit_count, na.rm = TRUE)
+  ),
+  friend_count = c(
+    nrow(num_vars_user),
+    #sum(num_vars_user$friend_count),
+    mean(num_vars_user$friend_count, na.rm = TRUE),
+    sd(num_vars_user$friend_count, na.rm = TRUE),
+    median(num_vars_user$friend_count, na.rm = TRUE),
+    min(num_vars_user$friend_count, na.rm = TRUE),
+    max(num_vars_user$friend_count, na.rm = TRUE)
+  )
+)
+#desc_table2
+```
+
+### 1.3. User Review Data
+
+```{r}
+# PH User  Review
+# ==================================
+review_dt<- read.csv(review)
+head(review_dt)
+
+user_review <- review_dt  |> 
+  semi_join(business_dt, by = "user_id")  |> 
+  filter(nchar(as.character(text)) > 0) |> 
+  select(-date)
+#head(user_review)#485191
+user_review$review_length <- nchar(as.character(user_review$text))
+
+
+desc_table3 <- data.frame(
+  Statistic = c("N", "Mean", "SD", "Median", "Min", "Max"),
+  review_length = c(
+    nrow(user_review),
+    mean(user_review$review_length, na.rm = TRUE),
+    sd(user_review$review_length, na.rm = TRUE),
+    median(user_review$review_length, na.rm = TRUE),
+    min(user_review$review_length, na.rm = TRUE),
+    max(user_review$review_length, na.rm = TRUE)
+    )) 
+
+```
+
+
+### 1.4 DS
+```{r}
+process_table <- function(df, group_name) {
+  df  |> 
+    pivot_longer(-Statistic, names_to = "Variable", values_to = "Value") |> 
+     pivot_wider(names_from = Statistic, values_from = Value) |> 
+    mutate(
+      Group = group_name,
+      Variable = case_when(
+        Variable == "restaurant_star" ~ "Restaurant Star",
+        Variable == "restaurant_review_count" ~ "Restaurant Review Number",
+        Variable == "price_level" ~ "Price ($-$$$$)",
+        Variable == "restaurant_visit_star" ~ "Restaurant_Visited Star",
+        Variable == "restaurant_category_count" ~ "Restaurant Category Number",
+        Variable == "user_review_count" ~ "User Review Number",
+        Variable == "user_category_count" ~ "User Category Number",
+        Variable == "restaurant_visit_count" ~ "Restaurant_Visited Number",
+        Variable == "friend_count" ~ "Friend Number",
+        Variable == "review_length" ~ "User Review Text Length",
+        TRUE ~ Variable
+      )
+    ) |> 
+    select(Group, Variable, N, Mean, SD, Median,Min, Max)
+}
+
+
+desc_table1 <- process_table(desc_table1, "Restaurants")
+desc_table2 <- process_table(desc_table2, "Users")
+desc_table3 <- process_table(desc_table3, "Reviews")
+
+final_table <- bind_rows(desc_table1, desc_table2, desc_table3) |>
+  mutate(across(c(Mean, SD,Median, Min, Max), ~ round(as.numeric(.), 1)))
+
+
+tbl1<- final_table  |> 
+  flextable() |> 
+  merge_v(j = "Group") |> 
+  font(fontname = "Times New Roman", part = "all")|> 
+  fontsize(size = 10, part = "all") |> 
+  bold(part = "header")|> 
+  width(j = 2, width = 1.2) |>   #column 1st
+  autofit() |> 
+  set_caption("Decriptive Statistics of Business, User & Review Distribution") |> 
+  add_footer_lines("Note: Data From Yelp in Philadelphia.")
+```
+
+
+
+# 2. LDA - Latent Dirichlet Allocation
+
+
+### 2.1 User-Business Matrix for LDA (DTM > 5)
+
+- Transform matrix into DTM format;
+- Choose users who have more than 5 visits and businesses that have more than 5 reviews
+
+```{r}
+
+
+user_business_matrix <- readMM(paste0(data_dir,'User_Business_Matrix0319.mtx'))
+
+row_users <- read.csv(paste0(data_dir,'row_user.csv'), header = FALSE)[,1]#all rows on 1st column
+col_business <- read.csv(paste0(data_dir,'col_business.csv'), header = FALSE)[,1]#all rows on 1st column
+rownames(user_business_matrix) <- row_users
+colnames(user_business_matrix) <- col_business
+#dim(user_business_matrix) #25034  4387
+
+
+dtm <- as.DocumentTermMatrix(user_business_matrix,weighting = weightTf)
+#class(dtm) #"DocumentTermMatrix"    "simple_triplet_matrix"
+
+#delete business under certain visits and same as user 
+dtm <- dtm[, slam::col_sums(dtm) > 5]
+dtm <- dtm[slam::row_sums(dtm)  > 5, ] 
+dim(dtm) #  14370  3549[5]
+
+#filtered_businesses <- colnames(dtm)
+#write.csv(filtered_businesses,
+  #        "filtered_business_list(after dtm).csv",
+   #       row.names = FALSE)
+
+```
+
+### 2.2 K Selection
+- Perplexity: if a "elbow" point shows in plot of perplexity, topics are good fit 
+- Topic coherance: if higher, easier intepretation
+- JSD: if higher JSD, topics are distinguished better
+```{r}
+library(textmineR) 
+
+# Perplexity & Probabilistic Coherence
+# ==============================================
+#80/20 Train & Test data for ptrplexity
+set.seed(123)
+n <- nrow(dtm)
+idx <- sample(seq_len(n), size = floor(0.8 * n))
+tr_dt <- dtm[idx, , drop = FALSE]
+tst_dt  <- dtm[-idx, , drop = FALSE] 
+
+ks <- c(2,10,20,35,50,65,100)
+
+perp <- c()
+mean_coherence <- c()
+for(i in 1:length(ks)){
+  # Train
+  current_tm <- LDA(x = tr_dt,
+                    k = ks[i],
+                    method="Gibbs",
+                    control=list(iter = 500,
+                                 seed = 123,verbose = 200))
+  
+  perp[i] <- perplexity(object = current_tm,
+                        newdata = as.simple_triplet_matrix(tst_dt)) # perplexity() wants the test data in simple_triplet_matrix format.
+  
+  coh <- topic_coherence(current_tm, tr_dt, top_n_tokens = 10)
+  mean_coherence[i] <- mean(coh, na.rm = TRUE)
+ # print(perp)
+#  print(round(mean_coherence[i], 3))
+}
+
+
+#Jensen-Shannon Divergence to calculate between-topics similairty
+# ==============================================
+calculate_topic_jsd <- function(lda_model) {
+  topic_word_dist <- topicmodels::posterior(lda_model)$terms
+  n_topics <- nrow(topic_word_dist)
+  jsd_values <- c()
+  
+  for(i in 1:(n_topics-1)) {
+    for(j in (i+1):n_topics) {
+      p <- topic_word_dist[i, ]
+      q <- topic_word_dist[j, ]
+      
+      p <- p / sum(p)
+      q <- q / sum(q)
+      
+      m <- 0.5 * (p + q)
+      jsd <- 0.5 * sum(p * log(p / m)) + 0.5 * sum(q * log(q / m))
+      jsd_values <- c(jsd_values, jsd)
+    }
+  }
+  return(mean(jsd_values))
+}
+
+ks <- c(2,10,20,35,50,65,100)
+jsd_results <- data.frame(K = ks, mean_jsd = NA)
+
+mean_jsd<-c()
+for(i in 1:length(ks)) {
+  lda_temp <- LDA(x = tr_dt, 
+                  k = ks[i], 
+                  method = "Gibbs",
+                  control = list(iter = 500, seed = 123))
+  mean_jsd[i] <- calculate_topic_jsd(lda_temp) 
+}
+```
+
+
+```{r}
+#plot
+k_plot <- data.frame(
+  K = ks,
+  Perplexity = perp,
+  Coherence = mean_coherence,
+  JSD = mean_jsd)
+
+k_plot_long <- k_plot |>
+  pivot_longer(cols = c(Perplexity, Coherence, JSD),
+               names_to = "Metric",
+               values_to = "Value")
+
+fig1 <- ggplot(k_plot_long, aes(x = K, y = Value)) +
+  geom_line(color = "blue") +
+  geom_point() +
+  facet_wrap(~ Metric, scales = "free_y", ncol = 3) + #independent y-axis
+  labs(
+    #title = "K Selection Comparison for LDA Topic Number",
+    x = "Number of Topics (K)",
+    y = "Value") +
+  theme(
+    #plot.title = element_text(size = 15, face = "bold", hjust = 0.5),
+    strip.text = element_text(size = 15, face = "bold"))
+
+```
+
+
+
+```{r}
+#  LDA=50
+#=============================
+set.seed(123) 
+K <- 50
+lda <- LDA(x = dtm, 
+             k = K, 
+             method="Gibbs",
+             control=list(iter = 1000, 
+                          seed = 123, 
+                          verbose = 500),
+                          alpha = 0.1) #short/sparse text
+                          
+lda_posterior <- topicmodels::posterior(object = lda)
+
+#topic-word distribution, word =（P(restaurant | taste topic)）;
+topic_distr_over_words <- lda_posterior$terms
+
+topic_distr_over_words_dt <- data.table(topic = 1:nrow(topic_distr_over_words), topic_distr_over_words)
+topic_distr_over_words_dt <- melt.data.table(
+  topic_distr_over_words_dt,
+  id.vars = "topic",
+  variable.name = "Word",          
+  value.name = "Probability"      )
+
+# user_topic_dist =（P( topic | user doc)
+topic_distr_over_doc <- lda_posterior$topics#matrix:
+#summary(topic_distr_over_doc)
+
+user_topic_df <- topic_distr_over_doc |> 
+  as.data.frame() |> 
+  rownames_to_column("user_id") # Probability of 50 Topics
+
+```
+
+## 2.3 User Topic Distribution (taste topics)
+
+```{r}
+#Business x Attribute
+#========================
+bs_attr<-read.csv(paste0(data_dir,'Business_attribute0319.csv'))
+head(bs_attr)
+#pivot table & create price_taste
+bs_attr_long <- bs_attr |> 
+  pivot_longer(cols = -c(business_id, price_level), 
+               names_to = "taste", 
+               values_to = "value") |> 
+  filter(value>0) |>
+  group_by(business_id) |>
+  mutate(price_taste = paste0("P", price_level,"_",taste)) |> 
+  select(business_id,price_taste,price_level,taste)
+
+#cat("There are", length(unique(bs_attr_long$price_taste)),"unique combination s of taste and price.\n")#240 
+
+#each topic (taste) contains the word(restaurant) probability
+top8_interest_topic <- topic_distr_over_words_dt |> 
+  group_by(topic) |> 
+   slice_max(order_by = Probability, n = 8)  
+
+top8_business_attr <- top8_interest_topic |> 
+  rename(business_id = Word) |> 
+  left_join(bs_attr_long, by = "business_id", relationship = "many-to-many") |>
+  group_by(topic,business_id) |>  
+  summarise(
+    price_taste = paste(unique(price_taste), collapse = ", "),
+    Probability = first(Probability),
+    taste =paste(unique(taste), collapse = ", "),
+    price_level=paste(unique(price_level), collapse = ", "),
+    .groups = "drop"
+  ) |>
+  arrange(topic, desc(Probability)) |> 
+  mutate(probability = Probability) |> 
+  select(topic,price_taste,taste,price_level,probability)
+
+
+```
+
+## 2.4 Topic Qualitative Analysis
+```{r}
+library(stringr)
+library(reshape2)
+
+civ_type <- function(taste_string) {
+  civ <- list(
+    `American` = str_count(taste_string, regex("American|Cheesesteaks|Southern", ignore_case = TRUE)),
+    `European` = str_count(taste_string, regex("French|German|Belgian|Irish|British|Modern\\.European|Greek|Spanish|Italian|Pizza|Tapas|Creperies", ignore_case = TRUE)),
+    `Latin American` = str_count(taste_string, regex("Mexican|Latin\\.American|Caribbean|Cuban|Brazilian|Peruvian|Tex\\.Mex|Tacos", ignore_case = TRUE)),
+    `Asia`= str_count(taste_string, regex("Chinese|Cantonese|Dim\\.Sum|Szechuan|Shanghainese|Hong\\.Kong|Taiwanese|Japanese|Sushi\\.Bars|Ramen|Pan\\.Asian|Hot\\.Pot|Thai|Vietnamese|Korean|Malaysian|Singaporean|Asian\\.Fusion", ignore_case = TRUE)),
+    `Middle Eastern` = str_count(taste_string, regex("Middle\\.Eastern|Lebanese|Israeli|Halal|Kebab", ignore_case = TRUE)),
+    `Other Ethnic`   = str_count(taste_string, regex("African|Indian|Pakistani|Ethnic\\.Food|Mongolian", ignore_case = TRUE)),
+    `Other` = str_count(taste_string, regex("Specialty\\.Food|Noodles|Buffets|Seafood|Sandwiches|Soul\\.Food|Comfort\\.Food|Burgers", ignore_case = TRUE))
+  )
+  civ_df <- tibble(
+    civilization = names(civ),
+    score = as.numeric(civ)
+  ) |> 
+    filter(score > 0) |> 
+    arrange(desc(score))
+  
+  if (nrow(civ_df) == 0) {
+   # warning(paste("No match", taste_string)) 
+    return("Other")
+  }
+  
+  max_score <- max(civ_df$score)
+  top_civs <- civ_df |> filter(score == max_score) |> pull(civilization)
+  if (length(top_civs) >= 2) {
+    return(paste(top_civs, collapse = " + "))
+  }
+  
+  top_civ <- top_civs[1]
+  
+  if (nrow(civ_df) >= 2 && civ_df$score[2] >= 2) {
+    second <- civ_df$civilization[2]
+    return(paste(top_civ, "+", second))
+  }
+  
+  return(top_civ)
+}
+  
+
+top8_with_civ <- top8_business_attr |>
+  mutate(civ_group = map_chr(taste, civ_type))|>
+  group_by(topic) |>
+  summarise(
+    main_civ = civ_group[which.max(probability)],
+    main_taste = taste[which.max(probability)],
+    main_price = price_level[which.max(probability)],
+    main_prob = max(probability),
+    
+    all_tastes = paste(unique(civ_group), collapse = " | "),
+    .groups = "drop"
+  ) |>
+  arrange(topic)
+
+
+```
+
+
+```{r}
+
+topic_civ <- top8_with_civ |>
+  group_by(main_civ) |>
+  summarise(
+    topics = paste(topic, collapse = ", "),
+    words = paste0(main_taste," (P", main_price,")", collapse = "; "),
+    n_topics = n(),
+    .groups = "drop"
+  ) |> 
+    select(main_civ, topics,words)
+print(topic_civ)
+
+
+ggplot(data = topic_civ, aes(x = main_civ, y = n_topics)) + 
+  geom_bar(stat = "identity")
+
+
+user_civ <- user_topic_df %>% 
+  mutate(user_id = rownames(.)) %>% 
+  pivot_longer(cols = -user_id, names_to = "topic", values_to = "prob") %>%
+  mutate(topic = as.numeric(str_remove(topic, "V"))) %>%
+  left_join(topic_to_civ, by = "topic") %>%
+  group_by(user_id, main_civ) %>%
+  summarise(prob = sum(prob), .groups = "drop") %>%
+  pivot_wider(id_cols = user_id, names_from = main_civ, values_from = prob, values_fill = 0)  
+  
+```
+
+
+```{r}
+topics <- c(1, 7)
+tbl6 <-top8_business_attr |> filter(topic %in% topics)|>
+  select(topic,taste,price_level,probability) |> 
+flextable() |>
+  font(fontname = "Times New Roman", part = "all")|> 
+  fontsize(size = 10, part = "all") |> 
+  bold(part = "header")|> 
+  width(j = 1, width = 1.5) |>  
+  autofit() |> 
+  set_caption("Topic & Word Example") |> 
+  add_footer_lines("Note: Data From Yelp in Philadelphia.")
+
+ 
+tbl7 <-topic_civ|>
+flextable() |>
+  font(fontname = "Times New Roman", part = "all")|> 
+  fontsize(size = 10, part = "all") |> 
+  bold(part = "header")|> 
+   width(j = 3, width = 1.5) |>  
+  autofit() |> 
+  set_caption("Topic Name Example") |> 
+  add_footer_lines("Note: Data From Yelp in Philadelphia.")
+
+
+tbl8 <-top8_with_civ[1:5,] |> 
+  flextable() |>
+  font(fontname = "Times New Roman", part = "all")|> 
+  fontsize(size = 10, part = "all") |> 
+  bold(part = "header")|> 
+  width(j = 1, width = 1.5) |>  
+  autofit() |> 
+  set_caption("Topic Summary Example") |> 
+  add_footer_lines("Note: Data From Yelp in Philadelphia.")
+
+
+```
+
+
+
+```{r}
+library(ineq)
+gini_values <- user_civ |>
+   mutate(gini = apply(user_topic_df[, -1], 1, function(x) Gini(x)))  #apply(user_topic_df[, -1], 1, function(x) Gini(x))) ???
+
+# Gini Distribution of Users
+# ==============================================
+fig7 <-ggplot(data = gini_values, aes(x = gini)) +
+  geom_histogram(bins = 10, color = "black", fill = "darkgrey") +
+  stat_bin(aes(label = after_stat(count)), 
+           geom = "text", 
+           bins = 10,
+           vjust = -0.5,  
+           size = 3) +
+  geom_vline(xintercept = 0.3, 
+             color = "red", 
+             linetype = "dashed", 
+             linewidth = 1) +
+   labs(x = "Gini Coefficient", y = "Count")+
+      # title = "Distribution of User Topic Gini Coefficients") +
+  theme_minimal()+
+  theme(strip.text = element_text(size = 12, face = "bold"))
+
+
+```
+
+
+```{r}
+set.seed(123)
+#Gini = 0.3
+user_03 <- gini_values |> 
+  filter(gini == 0.3) |> 
+  sample_n(1) |>
+  pivot_longer(cols = - c(user_id,gini), names_to = "topic", values_to = "prob") 
+
+fig4<-ggplot(user_03, aes(x = topic, y = prob)) +
+  geom_bar(stat = "identity") +
+  ylim(0, 0.5) +
+  facet_wrap(~ paste0("Gini Coefficient = ", round(gini, 3))) +
+  labs(x = "Topics", 
+      y = "Probability")+
+  theme(strip.text = element_text(size = 25, face = "bold"),
+          axis.title = element_text(size = 12), 
+        axis.text.x  = element_text(angle = 45,hjust = 1,size = 12))
+
+#Bottom 30% Gini
+user_omni <- gini_values |> 
+  filter(gini < quantile(gini_values$gini, 0.3)) |> 
+  sample_n(1) |>
+  pivot_longer(cols = - c(user_id,gini), names_to = "topic", values_to = "prob") 
+
+fig5<-ggplot(user_omni, aes(x = topic, y = prob)) +
+  geom_bar(stat = "identity") +
+  ylim(0, 0.5) +
+  facet_wrap(~ paste0("Gini Coefficient = ", round(gini, 3))) +
+  labs(x = "Topics", 
+      y = "Probability")+
+  theme(strip.text = element_text(size = 25, face = "bold"),
+          axis.title = element_text(size = 12), 
+         axis.text.x  = element_text(angle = 45,hjust = 1,size = 12))
+
+#Gini > 0.4
+user_high <- gini_values |> 
+  filter(gini > 0.4) |> 
+  sample_n(1) |>
+  pivot_longer(cols = - c(user_id,gini), names_to = "topic", values_to = "prob") 
+
+fig6<-ggplot(user_other, aes(x = topic, y = prob)) +
+  geom_bar(stat = "identity") +
+  ylim(0, 0.5) +
+  facet_wrap(~ paste0("Gini Coefficient = ", round(gini, 3))) +
+  labs(x = "Topics", 
+      y = "Probability")+
+  theme( strip.text = element_text(size = 25, face = "bold"))
+
+```
+
+
+## 2.5 Omnivores by "Gini"
+We use 50 topics and bottom 30th pencitile of Gini coefficient, and to catogorize the user 50 topics. According to omnivores definition, their consumptions cross the taste types and price levels.
+
+```{r}
+#filter the users >= 2 price level
+user_price_diversity <- business_dt |> 
+  group_by(user_id) |> 
+  summarise(
+    n_price_levels = n_distinct(price_level, na.rm = TRUE),
+    .groups = "drop"
+  ) |> 
+  filter(n_price_levels >= 2) 
+
+user_topic_df <- user_topic_df |> 
+  filter(user_id %in% user_price_diversity$user_id)
+
+#cat("Users with price with >= 2 price levels:", nrow(user_topic_df))
+
+
+# Residualized Gini
+# ==============================================
+ user_gini<- user_topic_df |>
+   mutate(gini = apply(user_topic_df[, -1], 1, function(x) Gini(x))) 
+
+#aggregate user information into one dataframe
+user_gini_df <- user_gini |>  left_join(user_dt,by = "user_id")
+
+
+model_gini <- lm(gini ~ log(user_visit_count + 1) , data = user_gini_df )
+#summary(model_gini)
+user_gini_df$predicted_gini <- predict(model_gini, newdata = user_gini_df)
+user_gini_df$gini2 <- user_gini_df$gini - user_gini_df$predicted_gini
+
+```
+
+
+```{r}
+#| label: tbl-gini
+
+gini_table <-user_gini_df |> 
+          summarise(
+            Variable = c("Orginal Gini","Residualized Gini"),
+            N = c(n(), n()),
+            Median = c(median(gini),median(gini2)),
+            Mean = c(mean(gini),mean(gini2)),
+            IQR    = c(IQR(gini),IQR(gini2)),
+            Min = c(min(gini),min(gini2)),
+            Max = c(max(gini),max(gini2))) |> 
+  mutate(across(Median:Max, ~ round(., 3)))
+
+
+tbl2 <- gini_table  |> 
+  flextable()  |> 
+  font(fontname = "Times New Roman", part = "all")|> 
+  fontsize(size = 10, part = "all") |> 
+  bold(part = "header")|> 
+  width(j = 1, width = 1.5) |>   #column 1st
+  autofit() |> 
+  set_caption("Gini Coefficient Statistics") |> 
+  add_footer_lines("Note: Data From Yelp in Philadelphia.")
+
+print(tbl2)
+
+
+#Gini Distribution
+# ==============================================
+# ggplot(data = user_gini_df, aes(x = gini2)) +
+#   geom_histogram(bins = 15, color = "black", fill = "darkgrey") +
+#   stat_bin(aes(label = after_stat(count)), 
+#            geom = "text", 
+#            bins = 15,
+#            vjust = -0.5,  
+#            size = 3) +
+#   geom_vline(xintercept = omnivore_threshold, 
+#              color = "red", 
+#              linetype = "dashed", 
+#              linewidth = 1) +
+#    labs(x = "Gini Coefficient", y = "Count")+
+#       # title = "Distribution of User Topic Gini Coefficients") +
+#   theme_minimal()+
+#   theme(strip.text = element_text(size = 15, face = "bold"))
+```
+
+
+```{r}
+# Omnivore groups within lowest 30% Residualized Gini
+omnivore_threshold <- quantile(user_gini_df$gini2, 0.3)
+omnivore_user <- user_gini_df |>
+  filter(gini2 < omnivore_threshold) |>
+  select(user_id)
+
+cat("There are", nrow(omnivore_user), "omnivore users.", round(nrow(omnivore_user) / nrow(user_gini_df) * 100,2), "% of all users are omnivores(Gini index threshold:",round(omnivore_threshold,3),").\n")
+
+```
+
+
+
+
+
+# Export 
+
+```{r}
+#output as rds 
+#===================
+output_path <-paste0(data_dir, 'Code for replication')
+output_path_m<-paste0(data_dir, 'Code for replication/model')
+
+
+#K for LDA
+k_selection_results <- list(
+  ks = ks,
+  perplexity = perp,
+  coherence = mean_coherence,
+  jsd = mean_jsd
+)
+saveRDS(k_selection_results, file = paste0(output_path_m, 'K selection for LDA_100.rds'))
+
+
+#LDA Model(5) 
+#============
+#lda model
+saveRDS(lda, file = paste0(output_path_m, '/lda_model_k50.rds'))
+saveRDS(user_topic_df,file = paste0(output_path_m, '/user_topic_df.rds'))
+
+#lda model_all
+saveRDS(object = list(user_business_matrix=user_business_matrix,
+                      dtm=dtm, 
+                      lda=lda,
+                      k=k,
+                      topic_distr_over_words_dt,
+                      user_topic_df,
+                      top8_business_attr= top8_business_attr), 
+        file = paste0(output_path_m, '/lda_dtm_filter5.rds'))
+
+## write.csv(top8_business_attr,
+#           paste0(output_path,"/file/top8_business_topic50_dtm5.csv"), 
+#                  row.names = FALSE)
+
+#qualitative analysis with lda
+saveRDS(object = list( 
+                      user_civ,
+                      topic_name_with_civ = top8_with_civ), 
+        file = paste0(output_path_m, '/ldatopic_with_civ.rds'))
+
+
+
+#Gini
+saveRDS(omnivore_user, file = paste0(output_path_m,'/omnivore_user_list.rds'))
+saveRDS(user_gini_df, file = paste0(output_path_m,'/user_gini_df.rds'))
+
+
+
+
+
+
+
+```
+
+```{r}
+#output as png 
+#===================
+library(patchwork)
+
+#no. 1
+ggsave("LDA_K_Selection.png", fig1, dpi = 300,width = 15,height = 8)
+
+#no. 2
+k_plots <- fig2 + fig3 + 
+  plot_annotation(tag_levels = "A")  
+ggsave("Cluster_K_Selections400.png", k_plots, dpi = 300,width = 15,height = 8)
+
+#no. 3
+gini_plot <-  fig4+ fig5  +
+  plot_layout(ncol = 2) +
+  plot_annotation(
+    caption = "Note: Data From Yelp in Philadelphia.",
+    tag_levels = "A")
+ggsave("User_Gini_Plots.png", dpi = 300,width = 20,height = 15)
+
+#no. 4
+ggsave("Gini Distribution of Users.png", fig7, dpi = 300,width = 15,height = 8)
+
+
+
+#output as word doc
+#===================
+tbl_list <- list(tbl1, tbl2, tbl3, tbl4,tbl5, tbl6, tbl7, tbl8)
+
+doc <- read_docx()
+for (i in 1:length(tbl_list)) {
+  doc <- doc |>
+    body_add_par("") |>
+    body_add_flextable(tbl_list[[i]])
+}
+doc <- doc |> body_add_par("")
+
+print(doc, target = "Thesis_Tables2.docx")
+
+
+```
+
+

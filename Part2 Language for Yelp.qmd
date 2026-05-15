@@ -1,0 +1,468 @@
+---
+title: "LDA (DTM >5) "
+subtitle: " "
+author: Min Tang
+date: last-modified
+format: pdf
+execute: 
+  
+  message: false
+  warning: false
+  echo: false
+editor: 
+  markdown: 
+    wrap: sentence
+---
+
+#Loading
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+# Load libraries
+library(flextable)
+library(officer)
+library(modelsummary)
+library(dplyr)
+library(knitr)
+library(kableExtra)
+library(tibble)
+library(tidyverse)
+library(jsonlite)
+library(stringr)
+library(ggplot2)
+library(purrr) 
+library(tidyr)
+library(data.table)
+library(glue)
+library(tidygraph)
+library(ggraph)
+library(slam)         # New: needed for perplexity calc
+library(quanteda)     
+library(topicmodels) 
+library(topicdoc) 
+library(Matrix)
+library(tm)
+library(mlbench)
+library(elasticnet) 
+library(mclust) 
+library(cluster)
+```
+
+
+```{r}
+# file path
+# =================
+data_dir <- '/Users/a1-6/Desktop/CSS/1.Thesis/Data/'
+#setwd(data_dir)
+
+output_path <-paste0(data_dir, 'Code for replication')
+output_path_m<-paste0(data_dir, 'Code for replication/model')
+
+```
+
+
+# 1. PH Stats
+```{r}
+
+business <- paste0(data_dir,'merged_ph_dataclean0319.csv') #list()
+user <- paste0(data_dir,'user_stat0319.csv')
+review <- paste0(data_dir,'all_philly_reviews.csv')
+
+
+# 1.1 PH Business-Level Data (Unique ID)
+# ==================================
+#all records of users and their business visited(user id or business id can be duplicated)
+business_dt<-read.csv(business)
+dim(business_dt) #280112
+
+uni_business <- business_dt |> distinct(business_id, .keep_all = TRUE) |> select(-user_id)
+#nrow(uni_business)
+
+# 1.2 PH User-Level Data (Unique ID)
+# ==================================
+user_dt<- read.csv(user)
+head(user_dt,2)
+
+
+# 1.3 PH User  Review
+# ==================================
+review_dt<- read.csv(review)
+user_review <- review_dt  |> 
+  semi_join(business_dt, by = "user_id")  |> 
+  filter(nchar(as.character(text)) > 0) |> 
+  select(-date)
+#dim(user_review)#485191
+
+```
+
+# 2. LDA & Omnivore Results
+
+```{r}
+
+#LDA Model & Results
+#========================
+lda <- readRDS(paste0(output_path_m,"/lda_model_k50.rds"))
+lda_dtm5<-readRDS(paste0(output_path_m,"/lda_dtm_filter5.rds"))
+#top8_business_attr <- read.csv( paste0(output_path,"/file/top8_business_topic50_dtm5.csv")
+
+
+
+
+#User-level information & Gini coefficient
+#======================================================
+
+user_gini_df<-readRDS(paste0(output_path_m,'/user_gini_df.rds'))
+head(user_gini_df)
+
+gini_table <-user_gini_df |> 
+          summarise(
+            Variable = c("Orginal Gini","Residualized Gini"),
+            N = c(n(), n()),
+            Median = c(median(gini),median(gini2)),
+            Mean = c(mean(gini),mean(gini2)),
+            IQR    = c(IQR(gini),IQR(gini2)),
+            Min = c(min(gini),min(gini2)),
+            Max = c(max(gini),max(gini2))) |> 
+  mutate(across(Median:Max, ~ round(., 3)))
+#print(gini_table)
+
+
+#Omnivore users
+#================
+omnivore_threshold <- quantile(user_gini_df$gini2, 0.3)
+omnivore_user <- readRDS(paste0(output_path_m,'/omnivore_user_list.rds'))
+# omnivore_user <- user_gini_df |>
+#   filter(gini2 < omnivore_threshold) |>
+#   select(user_id)
+
+
+cat("There are", nrow(omnivore_user), "omnivore users.", round(nrow(omnivore_user) / nrow(user_gini_df) * 100,2), "% of all users are omnivores(Gini index threshold:",round(omnivore_threshold,3),").\n")
+
+```
+
+
+# 3. Stratification" by clustering: Explore Clusters of Omnivores
+-   WSS & Silhouette 
+```{r}
+#ominvore users with topic distribution
+omni_user_topic_df <- user_topic_df|> 
+ filter (user_id %in% omnivore_user2$user_id ) |> 
+  select(-(user_id))
+
+
+#scale & PCA for omnivore
+#===================
+omnivore_scale<- scale(omni_user_topic_df)
+omnivore_pca <- prcomp(omnivore_scale)
+
+var_explained <- cumsum(omnivore_pca$sdev^2 / sum(omnivore_pca$sdev^2))
+k <- which(var_explained >= 0.8)[1] 
+res_omnivore_pca <- omnivore_pca$x[, 1:k]
+```
+
+
+```{r}
+# WSS: all users & omnivores no clean pattern
+#====================================
+k<-2:200
+wss <- c()
+for(i in 1:length(k)){
+  temp <- kmeans(x = res_omnivore_pca, centers = k[i],nstart = 100,iter.max = 200) #nstart
+  wss[i] <- sum(temp$tot.withinss) 
+}
+
+fig2 <- ggplot(data.table(k=k,wss=wss),aes(x=k,y=wss)) +
+geom_point(size=3) +
+geom_line()+
+  labs(
+    title = "WSS Plot For The Best K Cluster",
+       x = "Number of Clusters (K)",
+       y = "Total Within-cluster Sum of Squares") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+```
+
+
+```{r}
+# Silhouette x K-means
+#=======================
+set.seed(123)
+sil_width <- c()
+ks <- 2:200 
+for(i in 1:length(ks)){
+  km <- kmeans(res_omnivore_pca, centers = ks[i], nstart = 100, iter.max = 200)
+  sil <- silhouette(km$cluster, dist(res_omnivore_pca))
+  sil_width[i] <- mean(sil[, 3])  
+}
+
+
+cat("The max silhouette value is", round(max(sil_width, na.rm = TRUE),3),"and the K is",which.max(sil_width), ".\n")#~0.05
+
+
+fig3 <- ggplot(data.table(k=ks,sil_width=sil_width),aes(x=k,y=sil_width)) +
+geom_point(size=3) +
+geom_line()+
+  labs(
+    title = "Silhouette Plot For The Best K Cluster",
+       x = "Number of Clusters (K)",
+       y = "Silhouette Score") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+
+
+```
+
+
+
+
+
+# 4. Authenticity: Text Analysis & Regression Models
+```{r}
+# Authentic Word Dict
+# ============================================
+authentic_word <- data.frame(
+  word = c("authentic", "genuine", "real", "skilled", "faithful", "legitimate",
+    "original", "traditional", "pure", "historical", "sincere", "master chef",
+    "craftsmanship", "honest", "integrity", "quintessential", "expert", "iconic",
+    "inspiring", "unique", "wholesome", "professional", "skillful","truthful", "unmistakable", "artisan", "unpretentious", "heartful",
+    "delicious", "virtuous", "normal", "creative", "interesting", "orthodox",
+    "artful", "special", "righteous", "substantial", "authoritative", "typical",
+    "awesome", "moral", "eccentric", "ethical", "fresh", "old-fashioned",
+    "usual", "decent", "unusual", "caring", "ambitious", "replica", "offbeat", "atypical", "unassuming", "invented", "new",
+    "unconventional", "peculiar", "outlandish", "assumed", "idiosyncratic",
+    "quirky", "extroverted", "modern", "unorthodox", "pretentious",
+    "untraditional", "artificial", "bogus", "forgery", "fake", "hoax", "cheat", "dishonest", "feigned",
+    "ersatz", "faked", "imitation", "quack", "unreal", "humbug", "impostor",
+    "sham", "unauthentic", "deceptive", "inauthentic", "false", "phony", "scam"),
+  weight = c(95, 92, 88, 83, 81, 81, 80, 79, 78, 77, 77, 75, 74, 74, 74, 74, 73, 73,73, 72, 72, 70, 70, 68, 68, 67, 67, 66, 65, 64, 63, 62, 62, 62, 60, 60, 58, 57, 56, 56, 55,55, 54, 54, 53, 53, 53, 51, 51, 49, 48,    46, 43, 41, 37, 36, 36, 36, 35, 32, 30, 30, 29, 28, 27, 27, 19, 17, 14,13, 13, 12, 11, 10, 10, 10, 9, 9, 9, 9, 8, 7, 7, 7, 7, 6, 6, 6, 5, 4))
+
+# "Authenticity" in User Review Text
+# ============================================
+pattern2 <- paste0(paste(tolower(authentic_word$word), collapse = "|"))
+user_review$lowtxt <- tolower(user_review$text)
+
+user_review$authentic_word_n <- user_review$lowtxt |>
+  str_extract_all(pattern2) |>
+  sapply(function(x) {
+    word_found <- x
+    if(length(word_found) > 0) {
+      return(length(word_found))   
+    } else {
+      return(0)}})
+
+
+user_review2 <- user_review |> 
+  mutate(omnivore = ifelse(user_id %in% omnivore_user2$user_id, 1, 0))  # Omnivore =1, Normal User=0
+
+#example
+# omni_user_review <- user_review2 |> filter (omnivore == 1) |> select(text) 
+# normal_user_review <- user_review2 |> filter (omnivore == 0) |> select(text) 
+#omni_user_review$text[1:2]
+#normal_user_review$text[1:2]
+
+
+#user data of users attribute incl. authenticity
+#===============================================
+user_dt_authentic <- user_review2 |> 
+  group_by(user_id,omnivore) |> 
+  summarise(
+    n_reviews = n(), 
+    n_authentic_reviews = sum(authentic_word_n > 0),        
+  #  avg_authentic_weight = mean(avg_authentic_weight, na.rm = TRUE),
+    .groups = "drop")  |> left_join(user_dt, by = "user_id")
+dim(user_dt_authentic) 
+
+
+```
+
+
+```{r}
+
+# Regression Models for number of authentic reviews 
+#(if omnivore users write more reviews about "authentic")
+#===================================================================
+model1 <-glm(n_authentic_reviews ~ omnivore + log(n_reviews + 1) + log(review_count_median + 1)  + restaurant_star_median + price_level_median,family = poisson,data = user_dt_authentic)
+
+model2 <-glm(n_authentic_reviews ~ omnivore * log(n_reviews + 1) + log(review_count_median + 1)  + restaurant_star_median + price_level_median,family = poisson,data = user_dt_authentic)
+#114124
+
+
+models<- list("Model 1" = model1,"Model 2" = model2)
+tbl3 <- modelsummary(
+  models,
+ output = "flextable", #"poisson_regression.html",
+  title = "Poisson Regression Results for Authenticity  Reviews Number", 
+  coef_map = c(
+    "omnivore" = "Omnivore (Bottom 30% Gini)",
+    "log(n_reviews + 1)" = "User Review Number",
+    "omnivore:log(n_reviews + 1)" = "Omnivore × User Review Number",
+    "log(review_count_median + 1)" = "Restaurant_Review (Median)",
+    "restaurant_star_median" = "Restaurant_Star (Median)",
+    "price_level_median" = "Restaurant_Price Level (Median)"
+  ),
+  gof_map = list(
+    list("raw" = "nobs",      "clean" = "N",           "fmt" = 2),
+    list("raw" = "aic",       "clean" = "AIC",         "fmt" = 2),
+    list("raw" = "bic",       "clean" = "BIC",         "fmt" = 2),
+    list("raw" = "r.squared", "clean" = "R²",          "fmt" = 2),
+    list("raw" = "adj.r.squared", "clean" = "Adj. R²", "fmt" = 2)
+  ),
+  statistic = "std.error" ,
+  stars = TRUE) |> 
+  font(fontname = "Times New Roman", part = "all")|> 
+  fontsize(size = 10, part = "all") |> 
+  bold(part = "header")|> 
+  width(j = 1, width = 1.5) |>   #column 1st
+  autofit()  
+```
+
+
+```{r}
+library(fixest)
+#include fixed effects on the restaurant, to examine omnivore users are more likely to contain authentic words
+#==================================================
+user_review3 <- user_review2 |> select (-omnivore) |> 
+  left_join(user_dt_authentic,by = "user_id") 
+
+
+model3 <- feglm(authentic_word_n ~ omnivore + log(n_reviews + 1) + 
+                         log(review_count_median + 1) + restaurant_star_median + price_level_median | business_id,
+                       data = user_review3,
+                       family = poisson,
+                       cluster = ~user_id)
+
+model4 <- feglm(authentic_word_n ~ omnivore * log(n_reviews + 1)+ log(review_count_median + 1)  + restaurant_star_median + price_level_median | business_id,
+  data = user_review3,
+  family = poisson,
+  cluster = ~user_id)
+
+dim(user_review3)#485191
+```
+
+```{r}
+
+models <- list("Model 3" = model3,"Model 4" = model4)
+tbl4<-modelsummary(
+ models,
+  output = "flextable",
+  title = "FE Regression Results for Authenticity-related Word Number",
+  statistic = c("std.error"),
+  coef_map = c(
+    "omnivore" = "Omnivore (Bottom 30% Gini)",
+    "log(n_reviews + 1)" = "User Review Number",
+    "omnivore:log(n_reviews + 1)" = "Omnivore × User Review Number",
+    "log(review_count_median + 1)" = "Restaurant_Review (Median)",
+    "restaurant_star_median" = "Restaurant_Star (Median)",
+    "price_level_median" = "Restaurant_Price Level (Median)"
+  ),
+  gof_map = list(
+    list("raw" = "nobs",      "clean" = "N",           "fmt" = 2),
+    list("raw" = "aic",       "clean" = "AIC",         "fmt" = 2),
+    list("raw" = "bic",       "clean" = "BIC",         "fmt" = 2),
+    list("raw" = "r.squared", "clean" = "R²",          "fmt" = 2),
+    list("raw" = "adj.r.squared", "clean" = "Adj. R²", "fmt" = 2)
+  ),
+  stars = TRUE,
+  notes = "Note: Models include business fixed effects. Standard errors are clustered at the user level. Significance levels: * p < 0.05; ** p < 0.01; *** p < 0.001."
+  )  |>
+  font(fontname = "Times New Roman", part = "all")|>
+  fontsize(size = 10, part = "all") |>
+  bold(part = "header")|>
+  width(j = 1, width = 2) |>   #column 1st
+  autofit()
+
+print(tbl4)
+
+
+```
+
+
+# Export 
+
+```{r}
+#output as rds 
+#===================
+output_path <-paste0(data_dir, 'Code for replication')
+output_path_m<-paste0(data_dir, 'Code for replication/model')
+
+
+#Explore Cluster of Omnivores
+wss_df <- data.table(k = k, wss = wss)
+sil_df <- data.table(k=ks,sil_width=sil_width)
+best_k <- which.max(sil_width)
+best_sil <- max(sil_width, na.rm = TRUE)
+saveRDS(object = list(omnivore_pca, 
+                      res_omnivore_pca, 
+                      k=k,
+                      wss_df, 
+                      best_k, 
+                      best_sil = which.max(sil_width)),
+        file = paste0(output_path, '/K selection for Clustering_200.rds'))
+
+
+#User Review
+#saveRDS(user_review, file = paste0(output_path, 'User Review with authentic.rds'))
+saveRDS(object =  list(
+  user_review = user_review,
+  pattern2 = pattern2,
+  timestamp = Sys.time()),
+  file = paste0(output_path, '/user reviews_authenticity.rds'))
+
+
+#Regression Models
+saveRDS(object = list(
+  model1 = model1, model2 = model2, model3 = model3, model4 = model4), 
+ file = paste0(output_path_m, '/authenticity_regression_models.rds'))
+
+
+
+ # write.csv(user_dt_authentic,
+ #          paste0(output_path,"/file/user_dt_authentic.csv"),
+ #                 row.names = FALSE)
+
+#bs_attr<-read.csv(paste0(data_dir,'Business_attribute0319.csv'))
+
+
+```
+
+
+```{r}
+#output as png 
+#===================
+library(patchwork)
+
+#no. 2
+k_plots <- fig2 + fig3 + 
+  plot_annotation(tag_levels = "A")  
+ggsave("Cluster_K_Selections200.png", k_plots, dpi = 300,width = 15,height = 8)
+
+
+#no. 3
+gini_plot <-  fig4+ fig5  +
+  plot_layout(ncol = 2) +
+  plot_annotation(
+    caption = "Note: Data From Yelp in Philadelphia.",
+    tag_levels = "A")
+ggsave("User_Gini_Plots.png", dpi = 300,width = 20,height = 15)
+
+#no. 4
+ggsave("LDA_K_Selection.png", fig1, dpi = 300,width = 15,height = 8)
+
+
+#output as word doc
+#===================
+tbl_list <- list(tbl1, tbl2, tbl3, tbl4, tbl5, tbl6, tbl7, tbl8)
+
+doc <- read_docx()
+for (i in 1:length(tbl_list)) {
+  doc <- doc |>
+    body_add_par("") |>
+    body_add_flextable(tbl_list[[i]])
+}
+doc <- doc |> body_add_par("")
+
+print(doc, target = "Thesis_Tables.docx")
+
+```
+
+
