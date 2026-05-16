@@ -16,7 +16,7 @@ The files '~/Model' consist of data and model results.
 
 
 # Appendix
-- ~/Appendix A: LDA topic results with key words, when topic K is 25 and 50
+- ~/Appendix A: LDA topic results with key words
 - ~/Appendix B: Robustness Check results and code
   
 * LDA (Latent Dirichlet Allocation)
