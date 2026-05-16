@@ -66,9 +66,9 @@ output_path_m<-paste0(data_dir, 'Code for replication/model')
 # 1. PH Stats
 ```{r}
 
-business <- paste0(data_dir,'merged_ph_dataclean0319.csv') #list()
-user <- paste0(data_dir,'user_stat0319.csv')
-review <- paste0(data_dir,'all_philly_reviews.csv')
+business <- paste0(output_path,'/merged_ph_dataclean0319.csv') #list()
+user <- paste0(output_path,'/user_stat0319.csv')
+review <- paste0(output_path,'/all_philly_reviews.csv')
 
 
 # 1.1 PH Business-Level Data (Unique ID)
@@ -105,6 +105,8 @@ user_review <- review_dt  |>
 #========================
 lda <- readRDS(paste0(output_path_m,"/lda_model_k50.rds"))
 lda_dtm5<-readRDS(paste0(output_path_m,"/lda_dtm_filter5.rds"))
+
+user_topic_df <-readRDS(paste0(output_path_m,"/user_topic_df.rds"))
 #top8_business_attr <- read.csv( paste0(output_path,"/file/top8_business_topic50_dtm5.csv")
 
 
@@ -144,11 +146,11 @@ cat("There are", nrow(omnivore_user), "omnivore users.", round(nrow(omnivore_use
 
 
 # 3. Stratification" by clustering: Explore Clusters of Omnivores
--   WSS & Silhouette 
+
 ```{r}
 #ominvore users with topic distribution
 omni_user_topic_df <- user_topic_df|> 
- filter (user_id %in% omnivore_user2$user_id ) |> 
+ filter (user_id %in% omnivore_user$user_id ) |> 
   select(-(user_id))
 
 
@@ -162,7 +164,7 @@ k <- which(var_explained >= 0.8)[1]
 res_omnivore_pca <- omnivore_pca$x[, 1:k]
 ```
 
-
+## 3.1 WSS & Silhouette 
 ```{r}
 # WSS: all users & omnivores no clean pattern
 #====================================
@@ -212,6 +214,70 @@ geom_line()+
 
 ```
 
+##3.2 Cluster Heterogeniety
+```{r}
+lda_topic_civ <- readRDS(paste0(output_path_m,"/ldatopic_with_civ.rds"))
+topic_name_with_civ<-lda_topic_civ$topic_name_with_civ #50 topics
+
+set.seed(123)
+best_k <- 43 #which.max(sil_width)
+km_final <- kmeans(res_omnivore_pca, centers = best_k, nstart = 100, iter.max = 200)
+
+cluster_centers <- km_final$centers  # shape: (best_k, k_pca)
+center_cor <- cor(t(centers_original))
+mean(center_cor[lower.tri(center_cor)]) # -0.02??
+
+rotation <- omnivore_pca$rotation[, 1:k, drop = FALSE]  # shape: (n_topics, k_pca)
+# 将 cluster_centers (PCA 空间) 映射回原始主题空间
+centers_original <- cluster_centers %*% t(rotation) # (best_k, n_topics)
+colnames(centers_original) <- colnames(omni_user_topic_df)
+```
+
+
+```{r}
+topic_names <- topic_name_with_civ$main_civ
+cluster_summary <- data.frame()
+
+for(i in 1:best_k) {
+  center_row <- centers_original[i, ]
+ 
+  top_indices <- order(center_row, decreasing = TRUE)[1:3]
+  top_names <- topic_names[top_indices]
+
+  cluster_size <- sum(km_final$cluster == i)
+  
+  temp_df <- data.frame(
+    cluster = i,
+    size = cluster_size,
+    top1 = top_names[1],
+    top2 = top_names[2],
+    top3 = top_names[3]
+  )
+  
+  cluster_summary <- rbind(cluster_summary, temp_df)
+  }
+
+
+#c_sample<- c(1:10)
+tbl5 <- cluster_summary %>%
+ # filter(cluster %in% c_sample) |> 
+  flextable() %>%
+  set_header_labels(
+    cluster = "Cluster",
+    size = "Size",
+    top1 = "First Taste",
+    top2 = "Second Taste",
+    top3 = "Third Taste"
+  ) %>%
+  font(fontname = "Times New Roman", part = "all")|> 
+  fontsize(size = 10, part = "all") |> 
+  bold(part = "header")|> 
+  autofit() |> 
+  add_footer_lines("Note: Data From Yelp in Philadelphia.")
+tbl5
+```
+
+
 
 
 
@@ -249,10 +315,12 @@ user_review$authentic_word_n <- user_review$lowtxt |>
       return(length(word_found))   
     } else {
       return(0)}})
+```
 
 
+```{r}
 user_review2 <- user_review |> 
-  mutate(omnivore = ifelse(user_id %in% omnivore_user2$user_id, 1, 0))  # Omnivore =1, Normal User=0
+  mutate(omnivore = ifelse(user_id %in% omnivore_user$user_id, 1, 0))  # Omnivore =1, Normal User=0
 
 #example
 # omni_user_review <- user_review2 |> filter (omnivore == 1) |> select(text) 
@@ -268,7 +336,6 @@ user_dt_authentic <- user_review2 |>
   summarise(
     n_reviews = n(), 
     n_authentic_reviews = sum(authentic_word_n > 0),        
-  #  avg_authentic_weight = mean(avg_authentic_weight, na.rm = TRUE),
     .groups = "drop")  |> left_join(user_dt, by = "user_id")
 dim(user_dt_authentic) 
 
@@ -431,6 +498,10 @@ saveRDS(object = list(
 #===================
 library(patchwork)
 
+#no. 1
+ggsave("LDA_K_Selection.png", fig1, dpi = 300,width = 15,height = 8)
+
+
 #no. 2
 k_plots <- fig2 + fig3 + 
   plot_annotation(tag_levels = "A")  
@@ -444,14 +515,13 @@ gini_plot <-  fig4+ fig5  +
     caption = "Note: Data From Yelp in Philadelphia.",
     tag_levels = "A")
 ggsave("User_Gini_Plots.png", dpi = 300,width = 20,height = 15)
-
-#no. 4
-ggsave("LDA_K_Selection.png", fig1, dpi = 300,width = 15,height = 8)
+```
 
 
+```{r}
 #output as word doc
 #===================
-tbl_list <- list(tbl1, tbl2, tbl3, tbl4, tbl5, tbl6, tbl7, tbl8)
+tbl_list <- list(tbl3, tbl4,tbl5)
 
 doc <- read_docx()
 for (i in 1:length(tbl_list)) {
@@ -461,7 +531,7 @@ for (i in 1:length(tbl_list)) {
 }
 doc <- doc |> body_add_par("")
 
-print(doc, target = "Thesis_Tables.docx")
+print(doc, target = "Thesis_Tables2.docx")
 
 ```
 
