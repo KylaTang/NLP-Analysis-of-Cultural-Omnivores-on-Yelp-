@@ -1,18 +1,4 @@
----
-title: "LDA (DTM >5) "
-subtitle: " "
-author: Min Tang
-date: last-modified
-format: pdf
-execute: 
-  
-  message: false
-  warning: false
-  echo: false
-editor: 
-  markdown: 
-    wrap: sentence
----
+
 
 #Loading
 
@@ -40,7 +26,7 @@ library(data.table)
 library(glue)
 library(tidygraph)
 library(ggraph)
-library(slam)         # New: needed for perplexity calc
+library(slam)        
 library(topicdoc) 
 library(Matrix)
 library(tm)
@@ -54,7 +40,7 @@ library(cluster)
 ```{r}
 # file path
 # =================
-data_dir <- '/Users/a1-6/Desktop/CSS/1.Thesis/Data/'
+data_dir <- '.../Data/'
 #setwd(data_dir)
 business <- paste0(data_dir,'merged_ph_dataclean0319.csv') #list()
 user <- paste0(data_dir,'user_stat0319.csv')
