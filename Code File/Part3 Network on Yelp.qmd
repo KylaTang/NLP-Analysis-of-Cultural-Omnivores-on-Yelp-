@@ -1,18 +1,4 @@
----
-title: "LDA (DTM >5) "
-subtitle: " "
-author: Min Tang
-date: last-modified
-format: pdf
-execute: 
-  
-  message: false
-  warning: false
-  echo: false
-editor: 
-  markdown: 
-    wrap: sentence
----
+
 
 #Loading
 
@@ -41,8 +27,8 @@ library(tidygraph)
 library(ggraph)
 library(tibble)
 library(flextable)
-library(slam)         # New: needed for perplexity calc
-library(quanteda)     # New: to process text
+library(slam)         
+library(quanteda)     
 library(topicmodels) 
 library(topicdoc) 
 #library(word2vec)
@@ -56,7 +42,7 @@ library(tm)
 ```{r}
 # file path
 # =================
-data_dir <- '/Users/a1-6/Desktop/CSS/1.Thesis/Data/'
+data_dir <- '.../Data/'
 #setwd(data_dir)
 
 output_path <-paste0(data_dir, 'Code for replication')
