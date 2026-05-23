@@ -9,7 +9,7 @@ The original dataset is from Yelp Open Dataset https://business.yelp.com/data/re
 - **Topic Modeling**: ~/Part1 LDA for Yelp.qmd 
 - **Linguistic Analysis**:  ~/Part2 Language for Yelp.qmd
 - **Network Analysis**:  ~/Part3 Network on Yelp.qmd
-- **User Classification** based on cultural consumption patterns
+
 
 
 The files '~/Model' consist of data and model results.
