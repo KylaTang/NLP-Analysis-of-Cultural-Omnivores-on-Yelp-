@@ -284,16 +284,21 @@ authentic_word <- data.frame(
 # "Authenticity" in User Review Text
 # ============================================
 pattern2 <- paste0(paste(tolower(authentic_word$word), collapse = "|"))
-user_review$lowtxt <- tolower(user_review$text)
+pattern2 <-gsub(" ", "\\\\s+", pattern2)
 
-user_review$authentic_word_n <- user_review$lowtxt |>
-  str_extract_all(pattern2) |>
-  sapply(function(x) {
-    word_found <- x
-    if(length(word_found) > 0) {
-      return(length(word_found))   
-    } else {
-      return(0)}})
+
+user_review <- user_review %>%
+  mutate(
+    text_clean = tolower(text),
+    text_clean = str_remove_all(text_clean, "[^a-z\\s]"), 
+    text_clean = str_squish(text_clean),                   
+    text_lemmatized = wordStem(text_clean, language = "en")      
+  )
+
+user_review$authentic_word_n <- str_count(
+  user_review$text_lemmatized, 
+  pattern2)
+
 ```
 
 
