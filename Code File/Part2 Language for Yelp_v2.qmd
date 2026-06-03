@@ -54,7 +54,7 @@ library(cluster)
 ```{r}
 # file path
 # =================
-data_dir <- '/Users/a1-6/Desktop/CSS/1.Thesis/Data/'
+data_dir <- '/1.Thesis/Data/'
 #setwd(data_dir)
 
 output_path <-paste0(data_dir, 'Code for replication')
@@ -382,7 +382,7 @@ tbl4<-modelsummary(
 ```{r}
 library(text2vec)
 library(reticulate)
-use_python("/Users/a1-6/.pyenv/versions/3.9.13/bin/python3", required = TRUE)
+use_python(".../python3", required = TRUE)
 
 sentence_transformers <- import("sentence_transformers")
 np <- import("numpy")
