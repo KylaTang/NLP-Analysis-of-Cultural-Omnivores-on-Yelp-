@@ -1,7 +1,8 @@
 # NLP-Analysis-of-Cultural-Omnivores-on-Yelp-
 From Consumption Choice, Linguistic Expression, and Network: A Natural Language Processing Analysis of Cultural Omnivores on Yelp
 
-# Paper: https://liu.diva-portal.org/smash/record.jsf?pid=diva2%3A2072274&dswid=5793
+# Paper
+Link: https://liu.diva-portal.org/smash/record.jsf?pid=diva2%3A2072274&dswid=5793
 
 # Data 
 The original dataset is from Yelp Open Dataset https://business.yelp.com/data/resources/open-dataset/
